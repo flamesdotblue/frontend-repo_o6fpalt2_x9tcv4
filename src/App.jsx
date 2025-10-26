@@ -34,6 +34,23 @@ function App() {
     setCredits((c) => Math.max(0, c - amount));
   };
 
+  const currentTitleMap = {
+    dashboard: 'Dashboard',
+    templates: 'Templates',
+    campaigns: 'Campaigns',
+    contacts: 'Contacts',
+    plans: 'Plans',
+    settings: 'Settings',
+  };
+
+  const goToQuickCampaign = () => {
+    setActive('campaigns');
+    // smooth scroll to top of main content
+    setTimeout(() => {
+      document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 0);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <TopNav
@@ -41,9 +58,11 @@ function App() {
         onOpenAuth={() => setAuthOpen(true)}
         credits={credits}
         onGoSettings={() => setActive('settings')}
+        current={currentTitleMap[active]}
+        onQuickCreate={goToQuickCampaign}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 md:grid-cols-[16rem_1fr] gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 md:grid-cols-[15rem_1fr] gap-6">
         <Sidebar
           active={active}
           onChange={setActive}
@@ -57,11 +76,15 @@ function App() {
               <div className="flex items-end justify-between">
                 <div>
                   <h2 className="text-2xl font-semibold text-gray-900">Dashboard</h2>
-                  <p className="text-gray-600 text-sm">Overview of your WhatsApp marketing performance</p>
+                  <p className="text-gray-600 text-sm">Key stats, recent activity, and quick actions.</p>
                 </div>
+                <button onClick={goToQuickCampaign} className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm rounded-md bg-emerald-600 text-white hover:bg-emerald-700">Start a Campaign</button>
               </div>
               <Dashboard data={dashboardData} />
-              <Forms onUseCredits={handleUseCredits} />
+              <div className="space-y-3">
+                <h3 className="font-semibold text-gray-900">Quick Actions</h3>
+                <Forms onUseCredits={handleUseCredits} initialTab="campaign" visibleTabs={["campaign"]} />
+              </div>
             </>
           )}
 
@@ -69,7 +92,7 @@ function App() {
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-gray-900">Message Templates</h2>
               <p className="text-gray-600">Create and manage message templates for faster campaign setup.</p>
-              <Forms />
+              <Forms initialTab="templates" visibleTabs={["templates"]} />
             </section>
           )}
 
@@ -77,7 +100,7 @@ function App() {
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-gray-900">Campaign Scheduler</h2>
               <p className="text-gray-600">Plan and schedule your campaigns with virtual numbers.</p>
-              <Forms onUseCredits={handleUseCredits} />
+              <Forms onUseCredits={handleUseCredits} initialTab="campaign" visibleTabs={["campaign"]} />
             </section>
           )}
 
@@ -85,7 +108,7 @@ function App() {
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-gray-900">Contacts</h2>
               <p className="text-gray-600">Upload CSVs or paste numbers to build your audience lists.</p>
-              <Forms />
+              <Forms initialTab="contacts" visibleTabs={["contacts"]} />
             </section>
           )}
 
@@ -93,7 +116,7 @@ function App() {
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-gray-900">Plans & Credits</h2>
               <p className="text-gray-600">Choose a plan and top-up credits. Payments are mocked in this prototype.</p>
-              <Forms />
+              <Forms initialTab="plans" visibleTabs={["plans"]} />
             </section>
           )}
 
