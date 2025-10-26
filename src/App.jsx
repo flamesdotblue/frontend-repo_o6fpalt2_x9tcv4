@@ -1,193 +1,104 @@
 import React, { useMemo, useState } from 'react';
-import TopNav from './components/TopNav';
-import Sidebar from './components/Sidebar';
-import Dashboard from './components/Dashboard';
-import Forms from './components/Forms';
-import { X } from 'lucide-react';
+import Navbar from './components/Navbar';
+import LandingHero from './components/LandingHero';
+import FeatureGrid from './components/FeatureGrid';
+import AuthForm from './components/AuthForm';
+import { CheckCircle } from 'lucide-react';
 
-function App() {
-  const [active, setActive] = useState('dashboard');
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
-  const [credits, setCredits] = useState(3200);
+export default function App() {
+  const [view, setView] = useState('landing'); // 'landing' | 'login' | 'signup' | 'dashboard'
+  const year = useMemo(() => new Date().getFullYear(), []);
 
-  const dashboardData = useMemo(() => ({
-    totalSent: 12540,
-    totalFailed: 320,
-    credits,
-    campaigns: 48,
-    activity: [
-      { title: 'Campaign "Diwali Promo" sent', time: '2 hours ago', count: '+2,100', type: 'success' },
-      { title: '12 numbers failed to deliver', time: '2 hours ago', count: '-12', type: 'fail' },
-      { title: 'New template approved', time: 'yesterday', count: '+1', type: 'success' },
-      { title: 'Contacts imported', time: '2 days ago', count: '+850', type: 'success' },
-    ],
-    campaignPerf: [
-      { name: 'Welcome Series', rate: 76 },
-      { name: 'Holiday Blast', rate: 64 },
-      { name: 'Cart Recovery', rate: 52 },
-      { name: 'Reactivation', rate: 35 },
-    ],
-  }), [credits]);
-
-  const handleUseCredits = (amount) => {
-    setCredits((c) => Math.max(0, c - amount));
+  const handleLoginSubmit = (data) => {
+    if (data?.switch === 'signup') {
+      setView('signup');
+      return;
+    }
+    alert('Signed in successfully. This is a demo — backend auth will be added later.');
+    setView('dashboard');
   };
 
-  const currentTitleMap = {
-    dashboard: 'Dashboard',
-    templates: 'Templates',
-    campaigns: 'Campaigns',
-    contacts: 'Contacts',
-    plans: 'Plans',
-    settings: 'Settings',
-  };
-
-  const goToQuickCampaign = () => {
-    setActive('campaigns');
-    // smooth scroll to top of main content
-    setTimeout(() => {
-      document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 0);
+  const handleSignupSubmit = (data) => {
+    if (data?.switch === 'login') {
+      setView('login');
+      return;
+    }
+    alert('Account created! This is a demo — verification and onboarding will be added later.');
+    setView('dashboard');
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <TopNav
-        onMenuClick={() => setMobileNavOpen(true)}
-        onOpenAuth={() => setAuthOpen(true)}
-        credits={credits}
-        onGoSettings={() => setActive('settings')}
-        current={currentTitleMap[active]}
-        onQuickCreate={goToQuickCampaign}
+    <div className="min-h-screen bg-white text-slate-900">
+      <Navbar
+        onLogin={() => setView('login')}
+        onSignup={() => setView('signup')}
+        onCTA={() => setView('signup')}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 md:grid-cols-[15rem_1fr] gap-6">
-        <Sidebar
-          active={active}
-          onChange={setActive}
-          open={mobileNavOpen}
-          onClose={() => setMobileNavOpen(false)}
-        />
-
-        <main className="space-y-6">
-          {active === 'dashboard' && (
-            <>
-              <div className="flex items-end justify-between">
-                <div>
-                  <h2 className="text-2xl font-semibold text-gray-900">Dashboard</h2>
-                  <p className="text-gray-600 text-sm">Key stats, recent activity, and quick actions.</p>
-                </div>
-                <button onClick={goToQuickCampaign} className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm rounded-md bg-emerald-600 text-white hover:bg-emerald-700">Start a Campaign</button>
+      {view === 'landing' && (
+        <>
+          <LandingHero onGetStarted={() => setView('signup')} onLearnMore={() => {
+            const el = document.getElementById('features');
+            el?.scrollIntoView({ behavior: 'smooth' });
+          }} />
+          <FeatureGrid />
+          <section id="pricing" className="py-16 md:py-24 bg-emerald-50/50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="max-w-2xl">
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Simple, usage-based pricing</h2>
+                <p className="mt-2 text-slate-600">Start free and pay only for what you use. Upgrade or cancel anytime.</p>
               </div>
-              <Dashboard data={dashboardData} />
-              <div className="space-y-3">
-                <h3 className="font-semibold text-gray-900">Quick Actions</h3>
-                <Forms onUseCredits={handleUseCredits} initialTab="campaign" visibleTabs={["campaign"]} />
+              <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[{name:'Starter',price:'Free',desc:'Experiment and learn',items:['100 credits','Basic templates','Community support']},{name:'Growth',price:'$49/mo',desc:'For small teams',items:['5,000 credits','Scheduling & segments','Email support']},{name:'Scale',price:'$149/mo',desc:'For growing brands',items:['20,000 credits','Advanced analytics','Priority support']}].map(t => (
+                  <div key={t.name} className="rounded-2xl border border-slate-200 bg-white p-6">
+                    <h3 className="font-semibold">{t.name}</h3>
+                    <div className="mt-2 text-3xl font-bold">{t.price}</div>
+                    <p className="mt-1 text-sm text-slate-600">{t.desc}</p>
+                    <ul className="mt-4 space-y-2 text-sm">
+                      {t.items.map(i => (
+                        <li key={i} className="flex items-center gap-2">
+                          <CheckCircle size={16} className="text-emerald-600" /> {i}
+                        </li>
+                      ))}
+                    </ul>
+                    <button onClick={() => setView('signup')} className="mt-6 w-full rounded-lg bg-slate-900 text-white py-2.5 hover:bg-slate-800">Choose {t.name}</button>
+                  </div>
+                ))}
               </div>
-            </>
-          )}
-
-          {active === 'templates' && (
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-900">Message Templates</h2>
-              <p className="text-gray-600">Create and manage message templates for faster campaign setup.</p>
-              <Forms initialTab="templates" visibleTabs={["templates"]} />
-            </section>
-          )}
-
-          {active === 'campaigns' && (
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-900">Campaign Scheduler</h2>
-              <p className="text-gray-600">Plan and schedule your campaigns with virtual numbers.</p>
-              <Forms onUseCredits={handleUseCredits} initialTab="campaign" visibleTabs={["campaign"]} />
-            </section>
-          )}
-
-          {active === 'contacts' && (
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-900">Contacts</h2>
-              <p className="text-gray-600">Upload CSVs or paste numbers to build your audience lists.</p>
-              <Forms initialTab="contacts" visibleTabs={["contacts"]} />
-            </section>
-          )}
-
-          {active === 'plans' && (
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-900">Plans & Credits</h2>
-              <p className="text-gray-600">Choose a plan and top-up credits. Payments are mocked in this prototype.</p>
-              <Forms initialTab="plans" visibleTabs={["plans"]} />
-            </section>
-          )}
-
-          {active === 'settings' && (
-            <section className="space-y-6 bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
-              <div>
-                <h2 className="text-2xl font-semibold text-gray-900">Settings</h2>
-                <p className="text-gray-600 text-sm">Manage workspace, numbers, and preferences.</p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-gray-900">Workspace</h3>
-                  <label className="block">
-                    <span className="text-sm text-gray-700">Business Name</span>
-                    <input className="mt-1 w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Acme Corp" />
-                  </label>
-                  <label className="block">
-                    <span className="text-sm text-gray-700">Default Sender</span>
-                    <select className="mt-1 w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                      <option>Evolution Node #1</option>
-                      <option>Evolution Node #2</option>
-                    </select>
-                  </label>
-                </div>
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-gray-900">Preferences</h3>
-                  <label className="flex items-center gap-3">
-                    <input type="checkbox" className="h-4 w-4" defaultChecked />
-                    <span className="text-sm text-gray-700">Email me campaign reports</span>
-                  </label>
-                  <label className="flex items-center gap-3">
-                    <input type="checkbox" className="h-4 w-4" />
-                    <span className="text-sm text-gray-700">Enable 2FA</span>
-                  </label>
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <button onClick={() => alert('Settings saved (dummy)!')} className="px-4 py-2 rounded-md bg-emerald-600 text-white hover:bg-emerald-700">Save Changes</button>
-              </div>
-            </section>
-          )}
-        </main>
-      </div>
-
-      {authOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setAuthOpen(false)} />
-          <div className="relative w-full max-w-md bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-            <button className="absolute top-3 right-3 text-gray-500 hover:text-gray-700" onClick={() => setAuthOpen(false)}>
-              <X className="w-5 h-5" />
-            </button>
-            <div className="mb-4">
-              <h3 className="text-xl font-semibold text-gray-900">Login / Signup</h3>
-              <p className="text-sm text-gray-600">Prototype-only authentication form</p>
             </div>
-            <form onSubmit={(e) => { e.preventDefault(); setAuthOpen(false); alert('Logged in (dummy)'); }} className="space-y-3">
-              <label className="block">
-                <span className="text-sm text-gray-700">Email</span>
-                <input type="email" required className="mt-1 w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="you@company.com" />
-              </label>
-              <label className="block">
-                <span className="text-sm text-gray-700">Password</span>
-                <input type="password" required className="mt-1 w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="••••••••" />
-              </label>
-              <button type="submit" className="w-full px-4 py-2 rounded-md bg-emerald-600 text-white hover:bg-emerald-700">Continue</button>
-            </form>
+          </section>
+        </>
+      )}
+
+      {view === 'login' && (
+        <AuthForm mode="login" onBack={() => setView('landing')} onSubmit={handleLoginSubmit} />
+      )}
+
+      {view === 'signup' && (
+        <AuthForm mode="signup" onBack={() => setView('landing')} onSubmit={handleSignupSubmit} />
+      )}
+
+      {view === 'dashboard' && (
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <h1 className="text-3xl font-bold">You’re in!</h1>
+          <p className="mt-2 text-slate-600">This demo focuses on the new landing and authentication screens. The full dashboard will appear here next.</p>
+          <div className="mt-8">
+            <button onClick={() => setView('landing')} className="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-50">Back to landing</button>
           </div>
         </div>
       )}
+
+      <footer className="border-t border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-sm text-slate-600 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p>© {year} WhatsLaunch. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            <a href="#features" className="hover:text-slate-900">Features</a>
+            <a href="#pricing" className="hover:text-slate-900">Pricing</a>
+            <button onClick={() => setView('login')} className="hover:text-slate-900">Login</button>
+            <button onClick={() => setView('signup')} className="hover:text-slate-900">Sign up</button>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
-
-export default App;
